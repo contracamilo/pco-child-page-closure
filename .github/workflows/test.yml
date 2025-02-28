@@ -13,21 +13,26 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x]
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Set up Node.js
+    - name: Set up Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
       with:
-        node-version: '16'
+        node-version: ${{ matrix.node-version }}
         cache: 'npm'
 
     - name: Install dependencies
       run: |
         npm ci
         npm ls
+      env:
+        NODE_OPTIONS: '--max-old-space-size=4096'
       
     - name: Verify test files
       run: |
@@ -61,6 +66,7 @@ jobs:
         DEBUG: 'web-test-runner:*'
         NODE_DEBUG: 'test'
         WTR_OUTPUT_DIR: './test-results'
+        NODE_OPTIONS: '--experimental-vm-modules --no-warnings'
     
     - name: Verify test results directory
       if: always()
@@ -90,4 +96,6 @@ jobs:
     
     - name: Build
       if: success()
-      run: npm run build 
+      run: npm run build
+      env:
+        NODE_OPTIONS: '--experimental-vm-modules --no-warnings' 

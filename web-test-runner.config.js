@@ -54,7 +54,17 @@ export default {
     esbuildPlugin({ 
       ts: true,
       target: 'es2020',
-      tsconfig: './tsconfig.json'
+      tsconfig: './tsconfig.json',
+      plugins: [
+        {
+          name: 'crypto-polyfill',
+          setup(build) {
+            build.onResolve({ filter: /^crypto$/ }, () => {
+              return { path: require.resolve('crypto-browserify') };
+            });
+          }
+        }
+      ]
     })
   ],
   middleware: [

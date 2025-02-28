@@ -1,6 +1,8 @@
 import { esbuildPlugin } from '@web/dev-server-esbuild';
 import { playwrightLauncher } from '@web/test-runner-playwright';
 
+const outputDir = process.env.WTR_OUTPUT_DIR || './test-results';
+
 export default {
   files: 'test/**/*.test.ts',
   nodeResolve: true,
@@ -19,12 +21,12 @@ export default {
       retries: 3,
       allowUncaught: true,
       forbidOnly: true,
-      reporter: 'dot',
+      reporter: ['dot', 'json', 'html'],
       reporterOptions: {
         outputs: [
           {
             name: 'json',
-            file: './test-results/results.json'
+            file: `${outputDir}/results.json`
           },
           {
             name: 'html',
@@ -37,7 +39,7 @@ export default {
   testRunner: {
     coverage: true,
     coverageConfig: {
-      reportDir: './test-results/coverage',
+      reportDir: `${outputDir}/coverage`,
       reporters: ['json', 'html', 'text'],
       exclude: ['**/node_modules/**/*', '**/test/**/*']
     },

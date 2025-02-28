@@ -25,11 +25,11 @@ describe('MyElement', () => {
 
   afterEach(() => {
     // Clean up any stubs that might have been created
-    const stubs = [
-      'postMessage',
-      'removeEventListener',
-      'close'
-    ].map(method => (window as any)[method]?.restore?.());
+    ['postMessage', 'removeEventListener', 'close'].forEach(method => {
+      if ((window as any)[method]?.restore) {
+        (window as any)[method].restore();
+      }
+    });
   });
 
   it('renders with default values', async () => {

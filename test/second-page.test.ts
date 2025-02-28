@@ -1,14 +1,16 @@
 import { html, fixture, expect } from '@open-wc/testing';
 import { stub } from 'sinon';
-import '../src/second-page.js';
 import { SecondPage } from '../src/second-page.js';
 
-suite('SecondPage', () => {
+// Ensure the component is defined
+customElements.define('second-page', SecondPage);
+
+describe('SecondPage', () => {
   let element: SecondPage;
   let windowCloseSpy: sinon.SinonStub;
   let openerPostMessage: sinon.SinonStub;
 
-  setup(async () => {
+  beforeEach(async () => {
     // Reset stubs for each test
     if (windowCloseSpy) windowCloseSpy.restore();
     windowCloseSpy = stub(window, 'close');
@@ -24,18 +26,19 @@ suite('SecondPage', () => {
     await element.updateComplete;
   });
 
-  teardown(() => {
+  afterEach(() => {
     if (windowCloseSpy) windowCloseSpy.restore();
+    sinon.restore();
   });
 
-  test('renders with default values', async () => {
+  it('renders with default values', async () => {
     const card = element.shadowRoot!.querySelector('.card');
     expect(card).to.exist;
     expect(element.title).to.equal('Second Page');
     expect(element.windowId).to.not.be.empty;
   });
 
-  test('displays window ID', async () => {
+  it('displays window ID', async () => {
     const testId = 'test-window-id';
     element.windowId = testId;
     await element.updateComplete;
@@ -45,7 +48,7 @@ suite('SecondPage', () => {
     expect(idElement!.textContent).to.contain(testId);
   });
 
-  test('notifies parent window on ready', async () => {
+  it('notifies parent window on ready', async () => {
     expect(openerPostMessage.called).to.be.true;
     expect(openerPostMessage.firstCall.args[0]).to.deep.equal({
       type: 'WINDOW_READY',
@@ -54,7 +57,7 @@ suite('SecondPage', () => {
     });
   });
 
-  test('handles close message', async () => {
+  it('handles close message', async () => {
     openerPostMessage.reset();
 
     // Simulate receiving close message
@@ -74,7 +77,7 @@ suite('SecondPage', () => {
     expect(windowCloseSpy.calledOnce).to.be.true;
   });
 
-  test('ignores messages with wrong ID', async () => {
+  it('ignores messages with wrong ID', async () => {
     openerPostMessage.reset();
     windowCloseSpy.reset();
 
@@ -90,7 +93,7 @@ suite('SecondPage', () => {
     expect(windowCloseSpy.called).to.be.false;
   });
 
-  test('ignores messages from wrong origin', async () => {
+  it('ignores messages from wrong origin', async () => {
     openerPostMessage.reset();
     windowCloseSpy.reset();
 
@@ -106,7 +109,7 @@ suite('SecondPage', () => {
     expect(windowCloseSpy.called).to.be.false;
   });
 
-  test('removes event listener on disconnect', async () => {
+  it('removes event listener on disconnect', async () => {
     const removeEventListenerSpy = stub(window, 'removeEventListener');
     
     // Trigger the component's disconnectedCallback
@@ -114,7 +117,5 @@ suite('SecondPage', () => {
     
     expect(removeEventListenerSpy.called).to.be.true;
     expect(removeEventListenerSpy.firstCall.args[0]).to.equal('message');
-    
-    removeEventListenerSpy.restore();
   });
 }); 

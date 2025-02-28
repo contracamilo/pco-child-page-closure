@@ -1,24 +1,31 @@
 import { html, fixture, expect } from '@open-wc/testing';
 import { stub } from 'sinon';
-import '../src/my-element.js';
 import { MyElement } from '../src/my-element.js';
 
-suite('MyElement', () => {
+// Ensure the component is defined
+customElements.define('my-element', MyElement);
+
+describe('MyElement', () => {
   let element: MyElement;
 
-  setup(async () => {
+  beforeEach(async () => {
     element = await fixture<MyElement>(html`<my-element></my-element>`);
     await element.updateComplete;
   });
 
-  test('renders with default values', async () => {
+  afterEach(() => {
+    // Clean up any stubs
+    sinon.restore();
+  });
+
+  it('renders with default values', async () => {
     const container = element.shadowRoot!.querySelector('.container');
     expect(container).to.exist;
     expect(element.name).to.equal('World');
     expect(element.count).to.equal(0);
   });
 
-  test('increases count on button click', async () => {
+  it('increases count on button click', async () => {
     const button = element.shadowRoot!.querySelector('button');
     expect(button).to.exist;
     
@@ -27,7 +34,7 @@ suite('MyElement', () => {
     expect(element.count).to.equal(1);
   });
 
-  test('disables nav button when max tabs are open', async () => {
+  it('disables nav button when max tabs are open', async () => {
     const navButton = element.shadowRoot!.querySelector('.nav-button') as HTMLButtonElement;
     expect(navButton).to.exist;
     expect(navButton.disabled).to.be.false;
@@ -39,7 +46,7 @@ suite('MyElement', () => {
     expect(navButton.disabled).to.be.true;
   });
 
-  test('shows timer when process is running', async () => {
+  it('shows timer when process is running', async () => {
     element['isProcessRunning'] = true;
     element['remainingTime'] = 25;
     await element.updateComplete;
@@ -49,7 +56,7 @@ suite('MyElement', () => {
     expect(status!.textContent).to.include('25 seconds');
   });
 
-  test('handles window messages correctly', async () => {
+  it('handles window messages correctly', async () => {
     const windowInfo = {
       id: 'test-id',
       title: 'Test Window',
@@ -65,11 +72,9 @@ suite('MyElement', () => {
       type: 'CLOSE_WINDOW',
       id: 'test-id'
     });
-
-    postMessageStub.restore();
   });
 
-  test('cleans up resources on disconnect', async () => {
+  it('cleans up resources on disconnect', async () => {
     const removeEventListenerSpy = stub(window, 'removeEventListener');
     const timer = setInterval(() => {}, 1000);
     element['timer'] = timer as any;
@@ -79,7 +84,6 @@ suite('MyElement', () => {
     expect(removeEventListenerSpy.calledOnce).to.be.true;
     expect(removeEventListenerSpy.firstCall.args[0]).to.equal('message');
     
-    removeEventListenerSpy.restore();
     clearInterval(timer);
   });
 }); 

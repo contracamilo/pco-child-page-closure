@@ -15,7 +15,7 @@ export default {
   ],
   testFramework: {
     config: {
-      ui: 'tdd',
+      ui: 'bdd',
       timeout: '10000',
       retries: 3
     }
@@ -44,6 +44,11 @@ export default {
         <link rel="icon" href="data:,">
       </head>
       <body>
+        <script type="module">
+          // Import test framework and make it available globally
+          import { mocha } from '@web/test-runner-mocha';
+          window.mocha = mocha;
+        </script>
         <script type="module" src="${testFramework}"></script>
       </body>
     </html>

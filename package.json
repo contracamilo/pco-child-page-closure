@@ -7,7 +7,9 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "wtr",
-    "test:watch": "wtr --watch"
+    "test:watch": "wtr --watch",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "lit": "^3.1.0"
@@ -22,6 +24,7 @@
     "@web/test-runner": "^0.15.1",
     "@web/test-runner-commands": "^0.6.5",
     "chai": "^4.3.7",
+    "gh-pages": "^6.3.0",
     "sinon": "^15.1.0",
     "typescript": "^5.0.0",
     "vite": "^5.0.0"

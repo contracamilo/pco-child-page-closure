@@ -7,6 +7,10 @@ export default defineConfig({
       formats: ['es']
     },
     rollupOptions: {
+      input: {
+        main: '/index.html',
+        second: '/second.html'
+      },
       external: /^lit/
     }
   }

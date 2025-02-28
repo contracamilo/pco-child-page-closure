@@ -87,6 +87,12 @@ export class MyElement extends LitElement {
 
   private timer: number | undefined;
 
+  // Get base URL for GitHub Pages compatibility
+  private getBasePath() {
+    const baseElement = document.querySelector('base');
+    return baseElement ? baseElement.getAttribute('href') || '/' : '/';
+  }
+
   constructor() {
     super();
     // Configurar el listener de mensajes
@@ -161,7 +167,8 @@ export class MyElement extends LitElement {
 
   private _openNewTab() {
     const windowId = crypto.randomUUID();
-    const newWindow = window.open('/second?id=' + windowId, '_blank');
+    const basePath = this.getBasePath();
+    const newWindow = window.open(`${basePath}second.html?id=${windowId}`, '_blank');
     if (newWindow) {
       newWindow.focus();
       // Almacenar la referencia de la ventana junto con su ID

@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite';
+import { resolve } from 'path';
 
 // Get the repository name from package.json or environment variable
 const base = process.env.GITHUB_REPOSITORY 
@@ -14,8 +15,8 @@ export default defineConfig({
     },
     rollupOptions: {
       input: {
-        main: '/index.html',
-        second: '/second.html'
+        main: resolve(__dirname, 'index.html'),
+        second: resolve(__dirname, 'second.html')
       }
     }
   }

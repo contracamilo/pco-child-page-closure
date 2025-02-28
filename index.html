@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LitElement Example</title>
+    <base href="/" id="base-tag">
+    <script>
+      // Adjust base href for GitHub Pages
+      if (location.hostname !== 'localhost') {
+        const repo = location.pathname.split('/')[1];
+        document.getElementById('base-tag').href = `/${repo}/`;
+      }
+    </script>
     <script type="module" src="/src/index.ts"></script>
     <style>
         body {

@@ -41,12 +41,29 @@ jobs:
         npx playwright install chromium --with-deps
         npx playwright install-deps chromium
 
+    - name: Create test results directories
+      run: |
+        mkdir -p test-results
+        mkdir -p playwright-report
+        mkdir -p test-report
+
     - name: Run tests with debug output
       run: npm test
       env:
         CI: true
         DEBUG: 'web-test-runner:*'
         NODE_DEBUG: 'test'
+        WTR_OUTPUT_DIR: './test-results'
+    
+    - name: Verify test results directory
+      if: always()
+      run: |
+        echo "Verifying test-results directory..."
+        ls -la test-results/ || true
+        echo "Verifying playwright-report directory..."
+        ls -la playwright-report/ || true
+        echo "Verifying test-report directory..."
+        ls -la test-report/ || true
     
     - name: Upload test results
       if: always()
@@ -58,6 +75,7 @@ jobs:
           playwright-report/
           test-report/
         retention-days: 30
+        if-no-files-found: warn
     
     - name: Build
       if: success()

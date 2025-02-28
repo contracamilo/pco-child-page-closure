@@ -18,13 +18,29 @@ export default {
       timeout: '30000',
       retries: 3,
       allowUncaught: true,
-      forbidOnly: true
+      forbidOnly: true,
+      reporter: 'dot',
+      reporterOptions: {
+        outputs: [
+          {
+            name: 'json',
+            file: './test-results/results.json'
+          },
+          {
+            name: 'html',
+            file: './test-report/index.html'
+          }
+        ]
+      }
     }
   },
   testRunner: {
-    coverage: false,
-    failZero: false,
-    preserveSymlinks: true,
+    coverage: true,
+    coverageConfig: {
+      reportDir: './test-results/coverage',
+      reporters: ['json', 'html', 'text'],
+      exclude: ['**/node_modules/**/*', '**/test/**/*']
+    },
     browserStartTimeout: 60000,
     testsStartTimeout: 60000,
     testsFinishTimeout: 60000,

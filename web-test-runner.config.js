@@ -1,6 +1,7 @@
 import { esbuildPlugin } from '@web/dev-server-esbuild';
 import { playwrightLauncher } from '@web/test-runner-playwright';
 
+// Get output directory from environment variable or use default
 const outputDir = process.env.WTR_OUTPUT_DIR || './test-results';
 
 export default {
@@ -20,22 +21,24 @@ export default {
       timeout: '30000',
       retries: 3,
       allowUncaught: true,
-      forbidOnly: true,
-      reporter: ['dot', 'json', 'html'],
-      reporterOptions: {
-        outputs: [
-          {
-            name: 'json',
-            file: `${outputDir}/results.json`
-          },
-          {
-            name: 'html',
-            file: './test-report/index.html'
-          }
-        ]
-      }
+      forbidOnly: true
     }
   },
+  reporters: [
+    'dot',
+    {
+      name: 'json',
+      options: {
+        outputFile: `${outputDir}/results.json`
+      }
+    },
+    {
+      name: 'html',
+      options: {
+        outputDir: './test-report'
+      }
+    }
+  ],
   testRunner: {
     coverage: true,
     coverageConfig: {

@@ -25,22 +25,38 @@ jobs:
         cache: 'npm'
 
     - name: Install dependencies
-      run: npm ci
+      run: |
+        npm ci
+        npm ls
+      
+    - name: Verify test files
+      run: |
+        echo "Checking test files..."
+        ls -la test/
+        echo "Test file contents:"
+        cat test/*.test.ts
 
     - name: Install Playwright
-      run: npx playwright install chromium --with-deps
-    
-    - name: Run tests
+      run: |
+        npx playwright install chromium --with-deps
+        npx playwright install-deps chromium
+
+    - name: Run tests with debug output
       run: npm test
       env:
         CI: true
+        DEBUG: 'web-test-runner:*'
+        NODE_DEBUG: 'test'
     
     - name: Upload test results
       if: always()
       uses: actions/upload-artifact@v4
       with:
         name: test-results
-        path: test-results/
+        path: |
+          test-results/
+          playwright-report/
+          test-report/
         retention-days: 30
     
     - name: Build

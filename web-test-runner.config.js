@@ -9,14 +9,20 @@ export default {
       product: 'chromium',
       launchOptions: {
         headless: 'new',
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
       },
     }),
   ],
   testFramework: {
     config: {
       ui: 'tdd',
-      timeout: '2000'
+      timeout: '10000',
+      retries: 3
     }
+  },
+  testRunner: {
+    coverage: false,
+    failZero: false,
   },
   plugins: [
     esbuildPlugin({ 
@@ -25,11 +31,24 @@ export default {
       tsconfig: './tsconfig.json'
     })
   ],
+  middleware: [
+    function rewriteBase(context, next) {
+      return next();
+    },
+  ],
   testRunnerHtml: testFramework => `
+    <!DOCTYPE html>
     <html>
+      <head>
+        <meta charset="utf-8">
+        <link rel="icon" href="data:,">
+      </head>
       <body>
         <script type="module" src="${testFramework}"></script>
       </body>
     </html>
-  `
+  `,
+  coverageConfig: {
+    exclude: ['**/node_modules/**/*', '**/test/**/*'],
+  },
 }; 

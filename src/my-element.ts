@@ -33,9 +33,24 @@ export class MyElement extends LitElement {
   private timer: number | undefined;
 
   // Get base URL for GitHub Pages compatibility
-  private getBasePath() {
-    const baseElement = document.querySelector('base');
-    return baseElement ? baseElement.getAttribute('href') || '/' : '/';
+  protected getBasePath(): string {
+    try {
+      const baseElement = document.querySelector('base');
+      return baseElement ? baseElement.getAttribute('href') || '/' : '/';
+    } catch (e) {
+      console.warn('Error getting base path:', e);
+      return '/';
+    }
+  }
+
+  // Get origin for postMessage
+  protected getOrigin(): string {
+    try {
+      return window.location.origin;
+    } catch (e) {
+      console.warn('Error getting origin:', e);
+      return 'http://localhost:8000';
+    }
   }
 
   constructor() {
@@ -111,44 +126,56 @@ export class MyElement extends LitElement {
   }
 
   private _openNewTab() {
-    const windowId = crypto.randomUUID();
-    const basePath = this.getBasePath();
-    const newWindow = window.open(`${basePath}second.html?id=${windowId}`, '_blank');
-    if (newWindow) {
-      newWindow.focus();
-      // Almacenar la referencia de la ventana junto con su ID
-      this.openWindows = [...this.openWindows, { 
-        id: windowId, 
-        title: 'Second Page', 
-        window: newWindow 
-      }];
+    try {
+      const windowId = crypto.randomUUID();
+      const basePath = this.getBasePath();
+      const newWindow = window.open(`${basePath}second.html?id=${windowId}`, '_blank');
+      if (newWindow) {
+        newWindow.focus();
+        // Almacenar la referencia de la ventana junto con su ID
+        this.openWindows = [...this.openWindows, { 
+          id: windowId, 
+          title: 'Second Page', 
+          window: newWindow 
+        }];
+      }
+    } catch (e) {
+      console.warn('Error opening new tab:', e);
     }
   }
 
   private _handleMessage(event: MessageEvent) {
-    // Verificar el origen por seguridad
-    const allowedOrigin = window.location.origin;
-    if (event.origin !== allowedOrigin) return;
+    try {
+      // Verificar el origen por seguridad
+      const allowedOrigin = this.getOrigin();
+      if (event.origin !== allowedOrigin) return;
 
-    const { type, id, title } = event.data;
-    
-    if (type === 'WINDOW_READY') {
-      // Actualizar el título si es necesario
-      this.openWindows = this.openWindows.map(w => 
-        w.id === id ? { ...w, title } : w
-      );
-    } else if (type === 'WINDOW_CLOSED') {
-      this.openWindows = this.openWindows.filter(w => w.id !== id);
-      this.tabOpenCount = Math.max(0, this.tabOpenCount - 1);
+      const { type, id, title } = event.data;
+      
+      if (type === 'WINDOW_READY') {
+        // Actualizar el título si es necesario
+        this.openWindows = this.openWindows.map(w => 
+          w.id === id ? { ...w, title } : w
+        );
+      } else if (type === 'WINDOW_CLOSED') {
+        this.openWindows = this.openWindows.filter(w => w.id !== id);
+        this.tabOpenCount = Math.max(0, this.tabOpenCount - 1);
+      }
+    } catch (e) {
+      console.warn('Error handling message:', e);
     }
   }
 
   private _closeWindow(windowInfo: OpenWindow) {
-    // Enviar mensaje directamente a la ventana específica
-    windowInfo.window.postMessage({
-      type: 'CLOSE_WINDOW',
-      id: windowInfo.id
-    }, window.location.origin);
+    try {
+      // Enviar mensaje directamente a la ventana específica
+      windowInfo.window.postMessage({
+        type: 'CLOSE_WINDOW',
+        id: windowInfo.id
+      }, this.getOrigin());
+    } catch (e) {
+      console.warn('Error closing window:', e);
+    }
   }
 
   disconnectedCallback() {

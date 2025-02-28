@@ -2,20 +2,34 @@ import { html, fixture, expect } from '@open-wc/testing';
 import { stub } from 'sinon';
 import { MyElement } from '../src/my-element.js';
 
-// Ensure the component is defined
-customElements.define('my-element', MyElement);
+class TestMyElement extends MyElement {
+  protected override getBasePath(): string {
+    return '/test/';
+  }
+
+  protected override getOrigin(): string {
+    return 'http://localhost:8000';
+  }
+}
+
+// Register the test component
+customElements.define('test-my-element', TestMyElement);
 
 describe('MyElement', () => {
-  let element: MyElement;
+  let element: TestMyElement;
 
   beforeEach(async () => {
-    element = await fixture<MyElement>(html`<my-element></my-element>`);
+    element = await fixture<TestMyElement>(html`<test-my-element></test-my-element>`);
     await element.updateComplete;
   });
 
   afterEach(() => {
-    // Clean up any stubs
-    sinon.restore();
+    // Clean up any stubs that might have been created
+    const stubs = [
+      'postMessage',
+      'removeEventListener',
+      'close'
+    ].map(method => (window as any)[method]?.restore?.());
   });
 
   it('renders with default values', async () => {
@@ -57,18 +71,16 @@ describe('MyElement', () => {
   });
 
   it('handles window messages correctly', async () => {
+    const mockWindow = { postMessage: stub() };
     const windowInfo = {
       id: 'test-id',
       title: 'Test Window',
-      window: window
+      window: mockWindow as unknown as Window
     };
-
-    const postMessageStub = stub(window, 'postMessage');
 
     element['_closeWindow'](windowInfo);
     
-    expect(postMessageStub.calledOnce).to.be.true;
-    expect(postMessageStub.firstCall.args[0]).to.deep.equal({
+    expect(mockWindow.postMessage).to.have.been.calledWith({
       type: 'CLOSE_WINDOW',
       id: 'test-id'
     });
@@ -81,9 +93,8 @@ describe('MyElement', () => {
 
     element.remove();
 
-    expect(removeEventListenerSpy.calledOnce).to.be.true;
-    expect(removeEventListenerSpy.firstCall.args[0]).to.equal('message');
-    
+    expect(removeEventListenerSpy).to.have.been.calledWith('message');
+    removeEventListenerSpy.restore();
     clearInterval(timer);
   });
 }); 

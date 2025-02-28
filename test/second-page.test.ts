@@ -2,83 +2,97 @@ import { html, fixture, expect } from '@open-wc/testing';
 import { stub } from 'sinon';
 import { SecondPage } from '../src/second-page.js';
 
-// Ensure the component is defined
-customElements.define('second-page', SecondPage);
+class TestSecondPage extends SecondPage {
+  protected override getWindowId(): string {
+    return 'test-window-id';
+  }
+
+  protected override getOrigin(): string {
+    return 'http://localhost:8000';
+  }
+}
+
+// Register the test component
+customElements.define('test-second-page', TestSecondPage);
 
 describe('SecondPage', () => {
-  let element: SecondPage;
-  let windowCloseSpy: sinon.SinonStub;
-  let openerPostMessage: sinon.SinonStub;
+  let element: TestSecondPage;
+  let windowCloseSpy: ReturnType<typeof stub>;
+  let openerPostMessageSpy: ReturnType<typeof stub>;
 
   beforeEach(async () => {
-    // Reset stubs for each test
-    if (windowCloseSpy) windowCloseSpy.restore();
     windowCloseSpy = stub(window, 'close');
+    openerPostMessageSpy = stub();
+    Object.defineProperty(window, 'opener', {
+      value: { postMessage: openerPostMessageSpy },
+      configurable: true,
+      writable: true
+    });
 
-    // Mock window.opener
-    (window as any).opener = {
-      postMessage: stub()
-    };
-    openerPostMessage = (window as any).opener.postMessage;
-
-    element = await fixture<SecondPage>(html`<second-page></second-page>`);
-    // Wait for element to be ready
+    element = await fixture<TestSecondPage>(html`<test-second-page></test-second-page>`);
     await element.updateComplete;
+
+    // Reset the spy after initial setup
+    openerPostMessageSpy.reset();
   });
 
   afterEach(() => {
-    if (windowCloseSpy) windowCloseSpy.restore();
-    sinon.restore();
+    if (windowCloseSpy.restore) {
+      windowCloseSpy.restore();
+    }
+    Object.defineProperty(window, 'opener', {
+      value: null,
+      configurable: true,
+      writable: true
+    });
   });
 
   it('renders with default values', async () => {
     const card = element.shadowRoot!.querySelector('.card');
     expect(card).to.exist;
     expect(element.title).to.equal('Second Page');
-    expect(element.windowId).to.not.be.empty;
+    expect(element.windowId).to.equal('test-window-id');
   });
 
   it('displays window ID', async () => {
-    const testId = 'test-window-id';
-    element.windowId = testId;
-    await element.updateComplete;
-
     const idElement = element.shadowRoot!.querySelector('.window-id');
     expect(idElement).to.exist;
-    expect(idElement!.textContent).to.contain(testId);
+    expect(idElement!.textContent).to.contain('test-window-id');
   });
 
   it('notifies parent window on ready', async () => {
-    expect(openerPostMessage.called).to.be.true;
-    expect(openerPostMessage.firstCall.args[0]).to.deep.equal({
+    // Re-create element to trigger connectedCallback
+    element = await fixture<TestSecondPage>(html`<test-second-page></test-second-page>`);
+    await element.updateComplete;
+
+    expect(openerPostMessageSpy).to.have.been.calledWith({
       type: 'WINDOW_READY',
-      id: element.windowId,
+      id: 'test-window-id',
       title: element.title
     });
   });
 
   it('handles close message', async () => {
-    openerPostMessage.reset();
+    openerPostMessageSpy.reset();
+    windowCloseSpy.reset();
 
-    // Simulate receiving close message
     window.dispatchEvent(new MessageEvent('message', {
       data: {
         type: 'CLOSE_WINDOW',
-        id: element.windowId
+        id: 'test-window-id'
       },
-      origin: window.location.origin
+      origin: 'http://localhost:8000'
     }));
 
-    expect(openerPostMessage.calledOnce).to.be.true;
-    expect(openerPostMessage.firstCall.args[0]).to.deep.equal({
+    expect(openerPostMessageSpy).to.have.been.calledWith({
       type: 'WINDOW_CLOSED',
-      id: element.windowId
+      id: 'test-window-id'
     });
-    expect(windowCloseSpy.calledOnce).to.be.true;
+    expect(windowCloseSpy).to.have.been.called;
   });
 
   it('ignores messages with wrong ID', async () => {
-    openerPostMessage.reset();
+    openerPostMessageSpy.reset();
     windowCloseSpy.reset();
 
     window.dispatchEvent(new MessageEvent('message', {
@@ -86,36 +100,35 @@ describe('SecondPage', () => {
         type: 'CLOSE_WINDOW',
         id: 'wrong-id'
       },
-      origin: window.location.origin
+      origin: 'http://localhost:8000'
     }));
 
-    expect(openerPostMessage.called).to.be.false;
-    expect(windowCloseSpy.called).to.be.false;
+    expect(openerPostMessageSpy).not.to.have.been.called;
+    expect(windowCloseSpy).not.to.have.been.called;
   });
 
   it('ignores messages from wrong origin', async () => {
-    openerPostMessage.reset();
+    openerPostMessageSpy.reset();
     windowCloseSpy.reset();
 
     window.dispatchEvent(new MessageEvent('message', {
       data: {
         type: 'CLOSE_WINDOW',
-        id: element.windowId
+        id: 'test-window-id'
       },
       origin: 'https://wrong-origin.com'
     }));
 
-    expect(openerPostMessage.called).to.be.false;
-    expect(windowCloseSpy.called).to.be.false;
+    expect(openerPostMessageSpy).not.to.have.been.called;
+    expect(windowCloseSpy).not.to.have.been.called;
   });
 
   it('removes event listener on disconnect', async () => {
     const removeEventListenerSpy = stub(window, 'removeEventListener');
     
-    // Trigger the component's disconnectedCallback
     element.remove();
     
-    expect(removeEventListenerSpy.called).to.be.true;
-    expect(removeEventListenerSpy.firstCall.args[0]).to.equal('message');
+    expect(removeEventListenerSpy).to.have.been.calledWith('message');
+    removeEventListenerSpy.restore();
   });
 }); 

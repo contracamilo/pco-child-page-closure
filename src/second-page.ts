@@ -12,10 +12,28 @@ export class SecondPage extends LitElement {
   @property()
   windowId = '';
 
+  protected getOrigin(): string {
+    try {
+      return window.location.origin;
+    } catch (e) {
+      console.warn('Error getting origin:', e);
+      return 'http://localhost:8000';
+    }
+  }
+
+  protected getWindowId(): string {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('id') || crypto.randomUUID();
+    } catch (e) {
+      console.warn('Error getting window ID:', e);
+      return crypto.randomUUID();
+    }
+  }
+
   constructor() {
     super();
-    const urlParams = new URLSearchParams(window.location.search);
-    this.windowId = urlParams.get('id') || crypto.randomUUID();
+    this.windowId = this.getWindowId();
     window.addEventListener('message', this._handleMessage.bind(this));
     this._notifyReady();
   }
@@ -34,30 +52,42 @@ export class SecondPage extends LitElement {
   }
 
   private _notifyReady() {
-    window.opener?.postMessage({
-      type: 'WINDOW_READY',
-      id: this.windowId,
-      title: this.title
-    }, window.location.origin);
+    try {
+      window.opener?.postMessage({
+        type: 'WINDOW_READY',
+        id: this.windowId,
+        title: this.title
+      }, this.getOrigin());
+    } catch (e) {
+      console.warn('Failed to notify ready:', e);
+    }
   }
 
   private _handleMessage(event: MessageEvent) {
-    const allowedOrigin = window.location.origin;
-    if (event.origin !== allowedOrigin) return;
+    try {
+      const allowedOrigin = this.getOrigin();
+      if (event.origin !== allowedOrigin) return;
 
-    const { type, id } = event.data;
-    
-    if (type === 'CLOSE_WINDOW' && id === this.windowId) {
-      this._closeWindow();
+      const { type, id } = event.data;
+      
+      if (type === 'CLOSE_WINDOW' && id === this.windowId) {
+        this._closeWindow();
+      }
+    } catch (e) {
+      console.warn('Error handling message:', e);
     }
   }
 
   private _closeWindow() {
-    window.opener?.postMessage({
-      type: 'WINDOW_CLOSED',
-      id: this.windowId
-    }, window.location.origin);
-    window.close();
+    try {
+      window.opener?.postMessage({
+        type: 'WINDOW_CLOSED',
+        id: this.windowId
+      }, this.getOrigin());
+      window.close();
+    } catch (e) {
+      console.warn('Failed to close window:', e);
+    }
   }
 
   disconnectedCallback() {

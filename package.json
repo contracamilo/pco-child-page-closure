@@ -12,6 +12,7 @@
     "test": "wtr --config web-test-runner.config.js --debug --verbose",
     "test:watch": "wtr --watch --config web-test-runner.config.js --debug",
     "test:coverage": "wtr --config web-test-runner.config.js --coverage",
+    "test:report": "DEBUG=* NODE_OPTIONS='--no-deprecation' wtr \"./test/**/*.test.ts\" --node-resolve --config web-test-runner.config.js --coverage --debug --verbose",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
   },

@@ -1,6 +1,12 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
+interface OpenWindow {
+  id: string;
+  title: string;
+  window: Window;
+}
+
 @customElement('my-element')
 export class MyElement extends LitElement {
   static styles = css`
@@ -31,6 +37,11 @@ export class MyElement extends LitElement {
     .nav-button {
       background-color: #2196F3;
     }
+    .close-button {
+      background-color: #f44336;
+      padding: 8px 16px;
+      font-size: 14px;
+    }
     .nav-button:disabled {
       background-color: #cccccc;
       cursor: not-allowed;
@@ -39,6 +50,20 @@ export class MyElement extends LitElement {
       margin-top: 10px;
       font-style: italic;
       color: #666;
+    }
+    .windows-list {
+      margin-top: 20px;
+      padding: 10px;
+      border-top: 1px solid #eee;
+    }
+    .window-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px;
+      background: #f5f5f5;
+      margin: 5px 0;
+      border-radius: 4px;
     }
   `;
 
@@ -57,7 +82,16 @@ export class MyElement extends LitElement {
   @state()
   private remainingTime = 0;
 
+  @state()
+  private openWindows: OpenWindow[] = [];
+
   private timer: number | undefined;
+
+  constructor() {
+    super();
+    // Configurar el listener de mensajes
+    window.addEventListener('message', this._handleMessage.bind(this));
+  }
 
   render() {
     return html`
@@ -78,6 +112,20 @@ export class MyElement extends LitElement {
         ` : ''}
         ${this.tabOpenCount >= 2 ? html`
           <p class="status">Se han abierto todas las pestañas permitidas</p>
+        ` : ''}
+        
+        ${this.openWindows.length > 0 ? html`
+          <div class="windows-list">
+            <h3>Ventanas Abiertas</h3>
+            ${this.openWindows.map(window => html`
+              <div class="window-item">
+                <span>${window.title} (ID: ${window.id})</span>
+                <button class="close-button" @click=${() => this._closeWindow(window)}>
+                  Cerrar Ventana
+                </button>
+              </div>
+            `)}
+          </div>
         ` : ''}
         <slot></slot>
       </div>
@@ -112,7 +160,43 @@ export class MyElement extends LitElement {
   }
 
   private _openNewTab() {
-    window.open('/second', '_blank');
+    const windowId = crypto.randomUUID();
+    const newWindow = window.open('/second?id=' + windowId, '_blank');
+    if (newWindow) {
+      newWindow.focus();
+      // Almacenar la referencia de la ventana junto con su ID
+      this.openWindows = [...this.openWindows, { 
+        id: windowId, 
+        title: 'Segunda Página', 
+        window: newWindow 
+      }];
+    }
+  }
+
+  private _handleMessage(event: MessageEvent) {
+    // Verificar el origen por seguridad
+    const allowedOrigin = window.location.origin;
+    if (event.origin !== allowedOrigin) return;
+
+    const { type, id, title } = event.data;
+    
+    if (type === 'WINDOW_READY') {
+      // Actualizar el título si es necesario
+      this.openWindows = this.openWindows.map(w => 
+        w.id === id ? { ...w, title } : w
+      );
+    } else if (type === 'WINDOW_CLOSED') {
+      this.openWindows = this.openWindows.filter(w => w.id !== id);
+      this.tabOpenCount = Math.max(0, this.tabOpenCount - 1);
+    }
+  }
+
+  private _closeWindow(windowInfo: OpenWindow) {
+    // Enviar mensaje directamente a la ventana específica
+    windowInfo.window.postMessage({
+      type: 'CLOSE_WINDOW',
+      id: windowInfo.id
+    }, window.location.origin);
   }
 
   disconnectedCallback() {
@@ -120,5 +204,7 @@ export class MyElement extends LitElement {
     if (this.timer) {
       clearInterval(this.timer);
     }
+    // Remover el listener de mensajes
+    window.removeEventListener('message', this._handleMessage.bind(this));
   }
 } 

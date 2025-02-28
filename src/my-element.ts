@@ -111,23 +111,23 @@ export class MyElement extends LitElement {
           @click=${this._startTabOpenProcess}
           ?disabled=${this.isProcessRunning || this.tabOpenCount >= 2}
         >
-          Abrir Segunda Página (${2 - this.tabOpenCount} restantes)
+          Open Second Page (${2 - this.tabOpenCount} remaining)
         </button>
         ${this.isProcessRunning ? html`
-          <p class="status">Próxima pestaña se abrirá en: ${this.remainingTime} segundos</p>
+          <p class="status">Next tab will open in: ${this.remainingTime} seconds</p>
         ` : ''}
         ${this.tabOpenCount >= 2 ? html`
-          <p class="status">Se han abierto todas las pestañas permitidas</p>
+          <p class="status">All allowed tabs have been opened</p>
         ` : ''}
         
         ${this.openWindows.length > 0 ? html`
           <div class="windows-list">
-            <h3>Ventanas Abiertas</h3>
+            <h3>Open Windows</h3>
             ${this.openWindows.map(window => html`
               <div class="window-item">
                 <span>${window.title} (ID: ${window.id})</span>
                 <button class="close-button" @click=${() => this._closeWindow(window)}>
-                  Cerrar Ventana
+                  Close Window
                 </button>
               </div>
             `)}
@@ -174,7 +174,7 @@ export class MyElement extends LitElement {
       // Almacenar la referencia de la ventana junto con su ID
       this.openWindows = [...this.openWindows, { 
         id: windowId, 
-        title: 'Segunda Página', 
+        title: 'Second Page', 
         window: newWindow 
       }];
     }

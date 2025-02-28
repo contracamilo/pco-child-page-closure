@@ -29,7 +29,7 @@ export class SecondPage extends LitElement {
   `;
 
   @property()
-  title = 'Segunda Página';
+  title = 'Second Page';
 
   @property()
   windowId = '';
@@ -47,10 +47,10 @@ export class SecondPage extends LitElement {
       <div class="card">
         <h1>${this.title}</h1>
         <p>
-          ID de Ventana: 
+          Window ID: 
           <span class="window-id">${this.windowId}</span>
         </p>
-        <p>Esta ventana solo puede ser cerrada desde la página principal</p>
+        <p>This window can only be closed from the main page</p>
       </div>
     `;
   }

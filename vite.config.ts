@@ -1,7 +1,5 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
-import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill';
-import { NodeModulesPolyfillPlugin } from '@esbuild-plugins/node-modules-polyfill';
 
 // Get the repository name from package.json or environment variable
 const base = process.env.GITHUB_REPOSITORY 
@@ -10,26 +8,16 @@ const base = process.env.GITHUB_REPOSITORY
 
 export default defineConfig({
   base,
-  plugins: [
-    NodeGlobalsPolyfillPlugin({
-      buffer: true,
-      process: true,
-    }),
-    NodeModulesPolyfillPlugin(),
-    {
-      name: 'crypto-polyfill',
-      generateBundle() {
-        this.emitFile({
-          type: 'asset',
-          fileName: 'crypto-polyfill.js',
-          source: `window.crypto = window.crypto || { getRandomValues: function(arr) { for (let i = 0; i < arr.length; i++) { arr[i] = Math.floor(Math.random() * 256); } return arr; } };`,
-        });
-      },
-    }
-  ],
+  define: {
+    global: 'globalThis',
+    'process.env': {},
+    'window.crypto': 'crypto'
+  },
   resolve: {
     alias: {
-      crypto: 'crypto-browserify'
+      crypto: 'crypto-browserify',
+      stream: 'stream-browserify',
+      buffer: 'buffer'
     }
   },
   build: {
@@ -43,9 +31,8 @@ export default defineConfig({
         second: resolve(__dirname, 'second.html')
       }
     },
-    polyfillModulePreload: true
-  },
-  define: {
-    global: {}
+    commonjsOptions: {
+      transformMixedEsModules: true
+    }
   }
 }); 

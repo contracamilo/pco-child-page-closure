@@ -16,8 +16,7 @@ export default defineConfig({
       input: {
         main: '/index.html',
         second: '/second.html'
-      },
-      external: /^lit/
+      }
     }
   }
 }); 

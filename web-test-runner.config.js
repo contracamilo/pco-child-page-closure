@@ -47,8 +47,8 @@ export default {
         <meta charset="utf-8">
         <link rel="icon" href="data:,">
         <script type="module">
-          window.process = { env: { NODE_ENV: 'test' } };
           window.global = window;
+          window.process = { env: { NODE_ENV: 'test' } };
         </script>
       </head>
       <body>
@@ -58,5 +58,5 @@ export default {
   `,
   coverageConfig: {
     exclude: ['**/node_modules/**/*', '**/test/**/*'],
-  },
+  }
 }; 

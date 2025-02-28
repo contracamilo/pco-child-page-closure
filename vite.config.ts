@@ -10,15 +10,7 @@ export default defineConfig({
   base,
   define: {
     global: 'globalThis',
-    'process.env': {},
-    'window.crypto': 'crypto'
-  },
-  resolve: {
-    alias: {
-      crypto: 'crypto-browserify',
-      stream: 'stream-browserify',
-      buffer: 'buffer'
-    }
+    'process.env': {}
   },
   build: {
     lib: {

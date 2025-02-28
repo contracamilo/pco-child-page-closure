@@ -24,10 +24,10 @@ export class SecondPage extends LitElement {
   protected getWindowId(): string {
     try {
       const urlParams = new URLSearchParams(window.location.search);
-      return urlParams.get('id') || crypto.randomUUID();
+      return urlParams.get('id') || `window-${Date.now()}`;
     } catch (e) {
       console.warn('Error getting window ID:', e);
-      return crypto.randomUUID();
+      return `window-${Date.now()}`;
     }
   }
 

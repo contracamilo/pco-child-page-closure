@@ -1,5 +1,6 @@
-import { LitElement, html, css } from 'lit';
+import { LitElement, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { styles } from './styles/my-element.styles';
 
 interface OpenWindow {
   id: string;
@@ -9,63 +10,7 @@ interface OpenWindow {
 
 @customElement('my-element')
 export class MyElement extends LitElement {
-  static styles = css`
-    :host {
-      display: block;
-      padding: 25px;
-      color: var(--my-element-text-color, #000);
-    }
-    .container {
-      background: white;
-      border-radius: 8px;
-      padding: 20px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    button {
-      background-color: #4CAF50;
-      border: none;
-      color: white;
-      padding: 15px 32px;
-      text-align: center;
-      text-decoration: none;
-      display: inline-block;
-      font-size: 16px;
-      margin: 4px 2px;
-      cursor: pointer;
-      border-radius: 4px;
-    }
-    .nav-button {
-      background-color: #2196F3;
-    }
-    .close-button {
-      background-color: #f44336;
-      padding: 8px 16px;
-      font-size: 14px;
-    }
-    .nav-button:disabled {
-      background-color: #cccccc;
-      cursor: not-allowed;
-    }
-    .status {
-      margin-top: 10px;
-      font-style: italic;
-      color: #666;
-    }
-    .windows-list {
-      margin-top: 20px;
-      padding: 10px;
-      border-top: 1px solid #eee;
-    }
-    .window-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px;
-      background: #f5f5f5;
-      margin: 5px 0;
-      border-radius: 4px;
-    }
-  `;
+  static styles = styles;
 
   @property()
   name = 'World';
@@ -111,23 +56,23 @@ export class MyElement extends LitElement {
           @click=${this._startTabOpenProcess}
           ?disabled=${this.isProcessRunning || this.tabOpenCount >= 2}
         >
-          Abrir Segunda Página (${2 - this.tabOpenCount} restantes)
+          Open Second Page (${2 - this.tabOpenCount} remaining)
         </button>
         ${this.isProcessRunning ? html`
-          <p class="status">Próxima pestaña se abrirá en: ${this.remainingTime} segundos</p>
+          <p class="status">Next tab will open in: ${this.remainingTime} seconds</p>
         ` : ''}
         ${this.tabOpenCount >= 2 ? html`
-          <p class="status">Se han abierto todas las pestañas permitidas</p>
+          <p class="status">All allowed tabs have been opened</p>
         ` : ''}
         
         ${this.openWindows.length > 0 ? html`
           <div class="windows-list">
-            <h3>Ventanas Abiertas</h3>
+            <h3>Open Windows</h3>
             ${this.openWindows.map(window => html`
               <div class="window-item">
                 <span>${window.title} (ID: ${window.id})</span>
                 <button class="close-button" @click=${() => this._closeWindow(window)}>
-                  Cerrar Ventana
+                  Close Window
                 </button>
               </div>
             `)}
@@ -174,7 +119,7 @@ export class MyElement extends LitElement {
       // Almacenar la referencia de la ventana junto con su ID
       this.openWindows = [...this.openWindows, { 
         id: windowId, 
-        title: 'Segunda Página', 
+        title: 'Second Page', 
         window: newWindow 
       }];
     }

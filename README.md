@@ -2,7 +2,7 @@
 
 This project demonstrates advanced window management and inter-window communication using LitElement and TypeScript. It showcases how to handle multiple browser windows/tabs with controlled opening and closing mechanisms.
 
-[![Tests](https://github.com/[username]/lit/actions/workflows/test.yml/badge.svg)](https://github.com/contracamilo/lit/actions/workflows/test.yml)
+[![Tests](https://github.com/contracamilo/lit/actions/workflows/test.yml/badge.svg)](https://github.com/contracamilo/lit/actions/workflows/test.yml)
 
 ## Features
 

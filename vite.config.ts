@@ -15,7 +15,17 @@ export default defineConfig({
       buffer: true,
       process: true,
     }),
-    NodeModulesPolyfillPlugin()
+    NodeModulesPolyfillPlugin(),
+    {
+      name: 'crypto-polyfill',
+      generateBundle() {
+        this.emitFile({
+          type: 'asset',
+          fileName: 'crypto-polyfill.js',
+          source: `window.crypto = window.crypto || { getRandomValues: function(arr) { for (let i = 0; i < arr.length; i++) { arr[i] = Math.floor(Math.random() * 256); } return arr; } };`,
+        });
+      },
+    }
   ],
   resolve: {
     alias: {
@@ -32,6 +42,10 @@ export default defineConfig({
         main: resolve(__dirname, 'index.html'),
         second: resolve(__dirname, 'second.html')
       }
-    }
+    },
+    polyfillModulePreload: true
+  },
+  define: {
+    global: {}
   }
 }); 

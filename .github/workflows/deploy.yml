@@ -37,7 +37,8 @@ jobs:
 
     - name: Setup Git config
       run: |
-        git remote get-url origin || git remote set-url origin https://github.com/contracamilo/pco-child-page-closure.git
+        git remote get-url origin && git remote rm origin || echo "No such remote 'origin'"
+        git remote add origin https://github.com/contracamilo/pco-child-page-closure.git
         git add --all
         git config user.name github-actions[bot]
         git config user.email github-actions[bot]@users.noreply.github.com

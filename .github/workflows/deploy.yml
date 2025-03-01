@@ -45,7 +45,7 @@ jobs:
 
     - name: Ensure origin remote is set
       run: |
-        git remote | grep -q 'origin' && git remote rm origin || echo 'No origin remote to remove'
+        git remote get-url origin && git remote rm origin || echo 'No origin remote to remove'
         git remote add origin https://github.com/contracamilo/pco-child-page-closure.git
 
     - name: Deploy to GitHub Pages

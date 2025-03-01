@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LitElement child window closure P0C</title>
+    <base href="/" id="base-tag">
+    <script>
+      // Adjust base href for GitHub Pages
+      if (location.hostname !== 'localhost') {
+        const repo = location.pathname.split('/')[1];
+        document.getElementById('base-tag').href = `/${repo}/`;
+      }
+    </script>
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 
+                'Helvetica Neue', Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f0f0;
+        }
+    </style>
+  <script type="module" crossorigin src="/pco-child-page-closure/index-CLWFV2PA.js"></script>
+</head>
+<body>
+    <my-element>
+        <p>use this for slotted content!</p>
+    </my-element>
+</body>
+</html>

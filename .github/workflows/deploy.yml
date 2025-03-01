@@ -43,3 +43,6 @@ jobs:
         commit_message: ${{ github.event.head_commit.message }}
         user_name: 'github-actions[bot]'
         user_email: 'github-actions[bot]@users.noreply.github.com'
+        allow_empty_commit: true
+        keep_files: true
+        force_orphan: true

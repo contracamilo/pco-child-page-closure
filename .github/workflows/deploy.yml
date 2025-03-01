@@ -37,14 +37,14 @@ jobs:
 
     - name: Setup Git config
       run: |
-        git remote get-url origin || git remote add origin https://github.com/contracamilo/pco-child-page-closure.git
+        git remote get-url origin || git remote set-url origin https://github.com/contracamilo/pco-child-page-closure.git
         git add --all
         git config user.name github-actions[bot]
         git config user.email github-actions[bot]@users.noreply.github.com
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
-      with: 
+      with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./dist
         commit_message: ${{ github.event.head_commit.message }}

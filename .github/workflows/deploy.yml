@@ -35,6 +35,10 @@ jobs:
       env:
         NODE_OPTIONS: '--experimental-vm-modules --no-warnings'
 
+    - name: Ensure origin remote is set
+      run: |
+        git remote add origin https://github.com/contracamilo/pco-child-page-closure.git || true
+
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
